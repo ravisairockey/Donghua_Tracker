@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donghua Library — Pro Tracker</title>
+<style>
+:root{
+  --bg:#0B0F19;
+  --card:#161B22e6;
+  --card-solid:#161B22;
+  --card-2:#1c2330;
+  --border:#262f3e;
+  --text:#e6eaf2;
+  --muted:#8b97ad;
+  --blue:#3B82F6;
+  --green:#22C55E;
+  --gold:#FBBF24;
+  --purple:#8B5CF6;
+  --orange:#f97316;
+  --red:#ef4444;
+  --pink:#f43f5e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family: 'Inter', 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: radial-gradient(1200px 800px at 80% -10%, #16213a 0%, transparent 60%), 
+              radial-gradient(900px 600px at -10% 30%, #1a1433 0%, transparent 50%),
+              var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+a{color:var(--blue);text-decoration:none}
+.container{max-width:1180px;margin:0 auto;padding:28px 20px 80px}
+header{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:26px
+}
+.brand{
+  font-size:26px;font-weight:800;letter-spacing:-.02em
+}
+.brand span{color:var(--blue)}
+.search-wrap{flex:1;min-width:240px;max-width:460px;position:relative}
+.search-wrap input{
+  width:100%;background:rgba(22,27,34,.7);border:1px solid var(--border);
+  color:var(--text);padding:12px 14px 12px 40px;border-radius:14px;outline:none;
+  backdrop-filter: blur(12px);
+}
+.search-wrap svg{position:absolute;left:13px;top:12px;opacity:.5}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{
+  background:rgba(22,27,34,.65);border:1px solid var(--border);padding:7px 12px;border-radius:999px;
+  font-size:12px;color:var(--muted);cursor:pointer; user-select:none;backdrop-filter: blur(10px);
+  transition:.15s;
+}
+.pill.active,.pill:hover{color:#fff;border-color:#3a475d;background:rgba(59,130,246,.12)}
+
+/* Stats grid */
+.stats-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:22px
+}
+.stat-card{
+  background: linear-gradient(180deg, rgba(28,35,48,.82), rgba(22,27,34,.78));
+  border:1px solid var(--border);
+  border-radius:18px;padding:16px 16px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+.stat-card .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.stat-card .value{font-size:26px;font-weight:800;margin-top:4px}
+.stat-card .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.stat-card.accent{border-color: rgba(59,130,246,.35)}
+
+/* Dashboard panels */
+.dash-panels{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-bottom:22px}
+@media(max-width:900px){.dash-panels{grid-template-columns:1fr}}
+.panel{
+  background: linear-gradient(180deg, rgba(28,35,48,.82), rgba(22,27,34,.78));
+  border:1px solid var(--border);
+  border-radius:18px;padding:18px;
+  backdrop-filter: blur(16px);
+}
+.panel h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:12px}
+
+/* Tabs */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 14px}
+.tab{
+  padding:9px 14px;border-radius:12px;background:rgba(22,27,34,.55);border:1px solid var(--border);
+  color:var(--muted);cursor:pointer;font-weight:600;font-size:13px;transition:.15s
+}
+.tab.active{color:#fff;background:rgba(59,130,246,.14);border-color:#35507a}
+
+/* Library grid */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 14px;color:var(--muted);font-size:13px}
+.toolbar select, .toolbar button{
+  background:#141a24;border:1px solid var(--border);color:var(--text);
+  padding:8px 11px;border-radius:10px;font-size:13px
+}
+.toolbar button{cursor:pointer}
+.grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px
+}
+.card{
+  background: linear-gradient(180deg, rgba(28,35,48,.9), rgba(22,27,34,.88));
+  border:1px solid var(--border); border-radius:18px; overflow:hidden;
+  backdrop-filter: blur(14px);
+  transition: transform .15s ease, border-color .15s ease;
+}
+.card:hover{transform:translateY(-2px);border-color:#33415a}
+.poster{
+  height:108px;background: linear-gradient(135deg,#1d2433,#141a26);
+  display:flex;align-items:flex-end;padding:12px;
+  position:relative;
+}
+.poster .poster-title{font-weight:800;font-size:15px;line-height:1.25;text-shadow:0 2px 16px rgba(0,0,0,.5)}
+.fav-btn{
+  position:absolute;top:10px;right:10px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);
+  color:#ffd164;border-radius:999px;padding:6px 8px;font-size:12px;cursor:pointer;backdrop-filter:blur(6px)
+}
+.card-body{padding:12px 13px 13px}
+.rowline{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.chip{
+  font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;letter-spacing:.02em;white-space:nowrap
+}
+.chip.watching{background:rgba(34,197,94,.12);color:#7af0a6;border:1px solid rgba(34,197,94,.25)}
+.chip.completed{background:rgba(59,130,246,.13);color:#8bbfff;border:1px solid rgba(59,130,246,.28)}
+.chip.waiting{background:rgba(251,191,36,.11);color:#ffda7a;border:1px solid rgba(251,191,36,.25)}
+.chip.rewatch{background:rgba(139,92,246,.14);color:#c4b0ff;border:1px solid rgba(139,92,246,.28)}
+.chip.towatch{background:rgba(249,115,22,.12);color:#ffb380;border:1px solid rgba(249,115,22,.28)}
+.chip.dropped{background:rgba(239,68,68,.12);color:#ff9a9a;border:1px solid rgba(239,68,68,.28)}
+.chip.trash{background:rgba(113,113,122,.18);color:#c9c9cf;border:1px solid rgba(113,113,122,.28)}
+.meta{font-size:12px;color:var(--muted)}
+.ep-controls{display:flex;align-items:center;gap:7px}
+.ep-btn{
+  background:#111827;border:1px solid var(--border);color:#cdd6e6;border-radius:9px;padding:5px 9px;cursor:pointer;font-weight:700
+}
+.ep-num{font-variant-numeric:tabular-nums;font-weight:700}
+.progress{height:8px;background:#0f1420;border-radius:999px;overflow:hidden;border:1px solid #232b3a;margin:8px 0}
+.progress > span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),#7aa8ff)}
+.card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12px;color:var(--muted)}
+.watch-link{font-weight:700}
+
+/* List table for Completed / Dropped */
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:16px;background:rgba(18,23,32,.65);backdrop-filter:blur(12px)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:11px 12px;border-bottom:1px solid #202838;text-align:left;white-space:nowrap}
+th{color:#9aacc7;font-weight:600;background:rgba(255,255,255,.02)}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+/* Calendar */
+.cal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.cal-day{background:rgba(22,27,34,.7);border:1px solid var(--border);border-radius:16px;padding:12px;min-height:120px;backdrop-filter:blur(12px)}
+.cal-day h4{font-size:12px;color:#9aacc7;margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em}
+.cal-item{font-size:12px;color:#cdd7e8;margin:6px 0}
+
+/* Footer tools */
+.foot-tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.foot-tools button,.ghost{
+  background:#141a24;border:1px solid var(--border);color:#dce3f2;padding:10px 13px;border-radius:12px;cursor:pointer;font-weight:600
+}
+small.hint{color:var(--muted)}
+
+/* Canvas chart */
+.chart-box{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.legend{font-size:12px;color:#b8c3d6}
+.legend div{margin:4px 0}
+.dot{display:inline-block;width:9px;height:9px;border-radius:999px;margin-right:7px;vertical-align:middle}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modal{background:#151b26;border:1px solid var(--border);border-radius:16px;padding:18px;max-width:520px;width:100%}
+.modal h3{margin-bottom:10px}
+.modal label{font-size:12px;color:#9aacc7;display:block;margin-top:10px}
+.modal input,.modal select,.modal textarea{width:100%;background:#0f1420;border:1px solid #263043;color:#e6eaf2;border-radius:10px;padding:10px;margin-top:5px}
+.modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+
+/* responsive */
+@media(max-width:640px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+  .stat-card .value{font-size:22px}
+}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="brand">DONGHUA <span>LIBRARY</span></div>
+    <div class="search-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" placeholder="Search donghua, genre, studio…  ( / )" />
+    </div>
+    <div class="pills" id="statusPills">
+      <div class="pill active" data-status="all">All</div>
+      <div class="pill" data-status="Watching">Watching</div>
+      <div class="pill" data-status="Completed">Completed</div>
+      <div class="pill" data-status="To Watch">To Watch</div>
+      <div class="pill" data-status="Rewatch">Rewatch</div>
+      <div class="pill" data-status="Waiting">Waiting</div>
+      <div class="pill" data-status="Dropped">Dropped</div>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <div class="stats-grid" id="statsGrid">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- Dashboard panels -->
+  <div class="dash-panels">
+    <div class="panel">
+      <h3>Status Breakdown</h3>
+      <div class="chart-box">
+        <canvas id="pie" width="180" height="180" aria-label="Status pie chart"></canvas>
+        <div class="legend" id="pieLegend"></div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="meta" style="margin-bottom:6px">Overall Completion</div>
+        <div class="progress"><span id="overallProgress" style="width:40%"></span></div>
+        <small class="hint"><span id="overallText">—</span></small>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Recent Updates & Top Rated</h3>
+      <div id="recentList" style="font-size:13px;line-height:1.7;color:#c9d3e6"></div>
+      <div style="height:10px"></div>
+      <div id="topRated" style="font-size:13px;line-height:1.8;color:#c9d3e6"></div>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="library">📚 Library</div>
+    <div class="tab" data-tab="favorites">⭐ Favorites</div>
+    <div class="tab" data-tab="calendar">📅 Weekly Releases</div>
+    <div class="tab" data-tab="completed">📦 Completed</div>
+    <div class="tab" data-tab="dropped">🚫 Dropped / Trash</div>
+    <div class="tab" data-tab="statistics">📈 Statistics</div>
+  </div>
+
+  <!-- Library -->
+  <div id="view-library">
+    <div class="toolbar">
+      <label>Genre 
+        <select id="filterGenre"><option value="">All</option></select>
+      </label>
+      <label>Sort 
+        <select id="sortBy">
+          <option value="updated_desc">Last updated</option>
+          <option value="title_asc">Title A-Z</option>
+          <option value="ep_desc">Episodes ↓</option>
+          <option value="progress_desc">Progress ↓</option>
+          <option value="rating_desc">Rating ↓</option>
+        </select>
+      </label>
+      <button id="addBtn">+ Add Donghua</button>
+      <span style="flex:1"></span>
+      <small class="hint">Click − / + to update EP • ★ to favorite • Click title to edit</small>
+    </div>
+    <div class="grid" id="libraryGrid"></div>
+  </div>
+
+  <!-- Favorites -->
+  <div id="view-favorites" class="hidden">
+    <div class="grid" id="favoritesGrid"></div>
+  </div>
+
+  <!-- Calendar -->
+  <div id="view-calendar" class="hidden">
+    <div class="cal-grid" id="calendarGrid"></div>
+  </div>
+
+  <!-- Completed -->
+  <div id="view-completed" class="hidden">
+    <div class="table-wrap"><table id="completedTable">
+      <thead><tr><th>Title</th><th>EPs</th><th>Rating</th><th>Link</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+
+  <!-- Dropped -->
+  <div id="view-dropped" class="hidden">
+    <div class="table-wrap"><table id="droppedTable">
+      <thead><tr><th>Title</th><th>Dropped at EP</th><th>Reason / Notes</th><th>Link</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+
+  <!-- Statistics -->
+  <div id="view-statistics" class="hidden">
+    <div class="panel">
+      <h3>Statistics</h3>
+      <div id="statsBody" style="line-height:2;color:#c9d3e6"></div>
+    </div>
+  </div>
+
+  <div class="foot-tools">
+    <button id="exportBtn">Export JSON</button>
+    <button id="importBtn">Import JSON</button>
+    <input type="file" id="importFile" accept=".json" class="hidden">
+    <button id="exportCsvBtn">Export CSV</button>
+    <button id="resetBtn" class="ghost">Reset to default list</button>
+    <small class="hint">All data is saved locally in your browser (localStorage). Export regularly for backup.</small>
+  </div>
+</div>
+
+<!-- Edit modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="modalTitle">Edit Donghua</h3>
+    <label>Title<input id="f_title"></label>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <label>Current EP<input id="f_current" type="number" min="0"></label>
+      <label>Latest EP<input id="f_latest" type="number" min="0"></label>
+      <label>Rating (0-10)<input id="f_rating" type="number" min="0" max="10" step="0.1"></label>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <label>Status
+        <select id="f_status">
+          <option>Watching</option><option>Completed</option><option>To Watch</option>
+          <option>Waiting</option><option>Rewatch</option><option>Dropped</option><option>Trash</option>
+        </select>
+      </label>
+      <label>Release Day
+        <select id="f_day">
+          <option value="">—</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+          <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+        </select>
+      </label>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <label>Genre<input id="f_genre" placeholder="Xianxia / Cultivation"></label>
+      <label>Studio<input id="f_studio" placeholder=""></label>
+    </div>
+    <label>Watch Link<input id="f_link" placeholder="https://..."></label>
+    <label>Notes<textarea id="f_notes" rows="2"></textarea></label>
+    <label><input type="checkbox" id="f_fav"> ★ Favorite</label>
+    <div class="actions">
+      <button class="ghost" id="modalCancel">Cancel</button>
+      <button id="modalDelete" class="ghost" style="color:#ff8e8e">Delete</button>
+      <button id="modalSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_DATA = [
+{"title":"Perfect World","current":274,"latest":276,"status":"Watching","rating":9.6,"genre":"Xianxia","studio":"","day":"Friday","fav":true,"link":"","notes":""},
+{"title":"Renegade Immortal / Xian Ni","current":146,"latest":146,"status":"Watching","rating":9.5,"genre":"Xianxia","studio":"","day":"Wednesday","fav":true,"link":"","notes":""},
+{"title":"Battle Through The Heavens S5","current":201,"latest":201,"status":"Watching","rating":9.4,"genre":"Cultivation","studio":"","day":"Sunday","fav":true,"link":"","notes":""},
+{"title":"Tales of Herding Gods","current":88,"latest":89,"status":"Watching","rating":8.8,"genre":"Xianxia","studio":"","day":"Saturday","fav":false,"link":"","notes":""},
+{"title":"Beyond the Timescape","current":20,"latest":20,"status":"Watching","rating":8.2,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Against the Gods S2","current":5,"latest":5,"status":"Watching","rating":8.0,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"In Search of Gods S1","current":11,"latest":11,"status":"Watching","rating":7.5,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"","notes":"2026?"},
+{"title":"Nine Suns Martial God","current":20,"latest":20,"status":"Watching","rating":7.6,"genre":"Martial Arts","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Immortality S5","current":22,"latest":22,"status":"Watching","rating":8.1,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"","notes":"S1-S5"},
+{"title":"Lingwu Continent","current":167,"latest":167,"status":"Watching","rating":8.3,"genre":"Cultivation","studio":"","day":"Tuesday","fav":false,"link":"","notes":""},
+{"title":"Celestial Above All","current":60,"latest":60,"status":"Watching","rating":7.8,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"","notes":"AKA Supreme Over the Sky"},
+{"title":"The Gate of Mystical Realm","current":26,"latest":26,"status":"Watching","rating":7.4,"genre":"Fantasy","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"The Secrets of Star Divine Arts","current":40,"latest":40,"status":"Completed","rating":7.5,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Soul of Light","current":24,"latest":24,"status":"Completed","rating":7.2,"genre":"Fantasy","studio":"","day":"","fav":false,"link":"","notes":"S1 full"},
+{"title":"Legend of Xianwu","current":52,"latest":52,"status":"Completed","rating":7.9,"genre":"Martial Arts","studio":"","day":"","fav":false,"link":"https://www.youtube.com/watch?v=jVRUxwn5mFM","notes":""},
+{"title":"Martial Conqueror of the Cosmos","current":50,"latest":50,"status":"Watching","rating":7.6,"genre":"Martial Arts","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"World of Immortals","current":26,"latest":26,"status":"Completed","rating":8.0,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Word of Honor S1-S2","current":36,"latest":36,"status":"Completed","rating":8.4,"genre":"Wuxia","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Carp Reborn S1-S3","current":36,"latest":36,"status":"Completed","rating":7.3,"genre":"Fantasy","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"The Eternal Strife","current":40,"latest":40,"status":"Completed","rating":7.7,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"https://www.youtube.com/watch?v=-gAvt22tJlo","notes":""},
+{"title":"The Lone Sword Overlord","current":12,"latest":12,"status":"Watching","rating":7.0,"genre":"Martial Arts","studio":"","day":"","fav":false,"link":"https://www.youtube.com/watch?v=KQcx7CcqJFo","notes":""},
+{"title":"Myth of Ancient","current":280,"latest":280,"status":"Watching","rating":7.8,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"https://www.youtube.com/watch?v=MXWjaLjJMwc","notes":""},
+{"title":"Legend of Lotus Sword Fairy","current":54,"latest":54,"status":"Watching","rating":7.6,"genre":"Wuxia","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Sword Immortal is Here","current":24,"latest":24,"status":"Watching","rating":7.9,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"","notes":"S1-S2"},
+{"title":"The Other Side of Deep Space","current":18,"latest":18,"status":"Watching","rating":7.5,"genre":"Sci-Fi","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Wind Driver in Tang Dynasty","current":20,"latest":20,"status":"Completed","rating":7.1,"genre":"Historical","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"My Wechat Connects to Dragon Palace","current":16,"latest":16,"status":"Watching","rating":6.9,"genre":"Urban Fantasy","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"The Proud Emperor of Eternity","current":20,"latest":20,"status":"Watching","rating":7.4,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Lord of All Lords","current":26,"latest":26,"status":"Watching","rating":7.5,"genre":"Fantasy","studio":"","day":"","fav":false,"link":"https://www.youtube.com/watch?v=OxaO0AiqiC4","notes":""},
+{"title":"Divine Lord of the Heavens","current":30,"latest":30,"status":"Completed","rating":7.3,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"My Senior Brother is too Strong","current":24,"latest":24,"status":"Completed","rating":8.1,"genre":"Comedy / Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Over Goddess","current":40,"latest":40,"status":"Completed","rating":7.2,"genre":"Fantasy","studio":"","day":"","fav":false,"link":"https://youtu.be/BVPWGE5Tx3k?t=190","notes":""},
+{"title":"All Hail The Sect Leader","current":36,"latest":36,"status":"Completed","rating":7.8,"genre":"Comedy / Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Back as Immortal Lord","current":24,"latest":24,"status":"Completed","rating":7.0,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"The Alchemist's Rise","current":20,"latest":20,"status":"Completed","rating":7.1,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Yi Shi Du Zun","current":45,"latest":45,"status":"Watching","rating":7.6,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Yuan Zun","current":26,"latest":26,"status":"Completed","rating":8.3,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"https://www.youtube.com/watch?v=Juwq_9LHEDM","notes":""},
+{"title":"Ancient Lords","current":24,"latest":24,"status":"Completed","rating":7.0,"genre":"Fantasy","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Mysterious Treasures","current":18,"latest":18,"status":"Completed","rating":6.8,"genre":"Adventure","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"The Peak of True Martial Arts","current":196,"latest":196,"status":"Watching","rating":8.2,"genre":"Martial Arts","studio":"","day":"Monday","fav":false,"link":"","notes":""},
+{"title":"Peerless Martial Spirit","current":440,"latest":440,"status":"Watching","rating":8.0,"genre":"Martial Arts","studio":"","day":"Thursday","fav":false,"link":"","notes":""},
+{"title":"Spirit Sword Sovereign","current":10,"latest":10,"status":"Watching","rating":7.5,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Spiritual Martial Continent","current":30,"latest":30,"status":"Completed","rating":7.2,"genre":"Martial Arts","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Supreme God Emperor","current":610,"latest":610,"status":"Watching","rating":8.5,"genre":"Xianxia","studio":"","day":"Friday","fav":true,"link":"https://www.youtube.com/watch?v=NroRYJgjtRY","notes":""},
+{"title":"Thousand Autumns","current":16,"latest":16,"status":"Watching","rating":8.6,"genre":"Wuxia","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Heavenly Brick Hero","current":18,"latest":18,"status":"Completed","rating":6.5,"genre":"Comedy","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Proud Alchemy God","current":12,"latest":12,"status":"Watching","rating":7.0,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"The King of Wandering Cultivators","current":50,"latest":50,"status":"Watching","rating":7.4,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Hundred Refining Soaring Record","current":100,"latest":100,"status":"Watching","rating":7.7,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Immortals of the Godless Age","current":20,"latest":20,"status":"Completed","rating":5.5,"genre":"Fantasy","studio":"","day":"","fav":false,"link":"","notes":"trash"},
+{"title":"Urban Miracle Doctor","current":30,"latest":30,"status":"Waiting","rating":6.0,"genre":"Urban","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"First Immortal of Seven Realms","current":120,"latest":120,"status":"Watching","rating":7.9,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"https://youtu.be/Y2W3-Z-1JwQ?t=45362","notes":""},
+{"title":"Supreme Alchemy","current":110,"latest":110,"status":"Watching","rating":7.5,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Proud Swordsman","current":60,"latest":60,"status":"Waiting","rating":7.0,"genre":"Wuxia","studio":"","day":"","fav":false,"link":"","notes":"didn't watch"},
+{"title":"Super Heroic Spirit","current":0,"latest":0,"status":"Dropped","rating":5.0,"genre":"Action","studio":"","day":"","fav":false,"link":"https://www.youtube.com/watch?v=8om7V9xxZwI","notes":"REWATCH / DROPPED / Lost"},
+{"title":"Lord of Planets","current":6,"latest":24,"status":"Dropped","rating":3.5,"genre":"Sci-Fi","studio":"","day":"","fav":false,"link":"https://www.youtube.com/shorts/EKQ7y3dDl0M","notes":"BAD DROPPED after 6 hrs"},
+{"title":"Lord of Galaxy","current":45,"latest":45,"status":"Watching","rating":7.3,"genre":"Sci-Fi","studio":"","day":"","fav":false,"link":"https://youtu.be/b8jx27cZ2sw?t=2962","notes":""},
+{"title":"The Legend and the Hero / Wu Geng Ji","current":40,"latest":40,"status":"Watching","rating":8.7,"genre":"Action / Myth","studio":"","day":"","fav":true,"link":"","notes":"S3"},
+{"title":"The Legend of Sword Domain","current":189,"latest":189,"status":"Watching","rating":8.0,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"The Flame Imperial Guards","current":12,"latest":24,"status":"Dropped","rating":3.0,"genre":"Historical","studio":"","day":"","fav":false,"link":"","notes":"trash dropped boring"},
+{"title":"The Success of Empyrean Xuan Emperor","current":10,"latest":30,"status":"Dropped","rating":2.5,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":"trash dropped boring"},
+{"title":"Land of the Keyboard Immortal","current":134,"latest":134,"status":"Watching","rating":7.6,"genre":"Comedy / Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"The Legend of Sky Lord","current":24,"latest":24,"status":"Completed","rating":7.1,"genre":"Fantasy","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"The Dragon Star Lord","current":20,"latest":48,"status":"Trash","rating":2.0,"genre":"Fantasy","studio":"","day":"","fav":false,"link":"","notes":"Trash"},
+{"title":"King's Big Brother","current":16,"latest":16,"status":"Completed","rating":6.8,"genre":"Comedy","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Gemini Mission in Luo Yang","current":8,"latest":16,"status":"Trash","rating":3.2,"genre":"Mystery","studio":"","day":"","fav":false,"link":"","notes":"trash dropped"},
+{"title":"Fighting for the Throne","current":5,"latest":20,"status":"Trash","rating":2.8,"genre":"Historical","studio":"","day":"","fav":false,"link":"","notes":"trash dropped"},
+{"title":"The Legend of Yang Chen","current":40,"latest":40,"status":"Watching","rating":7.5,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Wan Jie Zhi Zun","current":141,"latest":141,"status":"Watching","rating":7.8,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"https://youtu.be/ZyALcKqJHsA?t=47427","notes":""},
+{"title":"A Record of a Mortal's Journey to Immortality","current":52,"latest":52,"status":"Waiting","rating":9.3,"genre":"Xianxia","studio":"","day":"","fav":true,"link":"","notes":"S3-S4 LOST"},
+{"title":"Lord of the Mysteries / LOTM","current":13,"latest":13,"status":"Completed","rating":9.7,"genre":"Mystery / Fantasy","studio":"","day":"","fav":true,"link":"","notes":"Done"},
+{"title":"A Will Eternal","current":52,"latest":52,"status":"Completed","rating":9.0,"genre":"Comedy / Cultivation","studio":"","day":"","fav":true,"link":"","notes":"Done"},
+{"title":"Ling Cage / Lincage","current":26,"latest":26,"status":"Completed","rating":8.9,"genre":"Sci-Fi","studio":"","day":"","fav":false,"link":"","notes":"Done"},
+{"title":"Slay the Gods","current":16,"latest":16,"status":"Completed","rating":8.4,"genre":"Action","studio":"","day":"","fav":false,"link":"","notes":"done"},
+{"title":"Forty Millenniums of Cultivation","current":32,"latest":32,"status":"Completed","rating":8.2,"genre":"Sci-Fi / Cultivation","studio":"","day":"","fav":false,"link":"","notes":"DONE"},
+{"title":"Martial Universe","current":72,"latest":72,"status":"Completed","rating":9.1,"genre":"Cultivation","studio":"","day":"","fav":true,"link":"https://youtu.be/Hz8Yj9bAzEE?t=23","notes":"Done S6, Waiting for S7"},
+{"title":"Legendary Overlord","current":0,"latest":0,"status":"To Watch","rating":0,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Spy x Sect","current":0,"latest":0,"status":"To Watch","rating":0,"genre":"Comedy","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Stellar Transformations","current":0,"latest":0,"status":"To Watch","rating":0,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Apotheosis","current":0,"latest":0,"status":"Rewatch","rating":8.5,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Jinwu Guard: The Wind Rises in Jinling","current":0,"latest":0,"status":"To Watch","rating":0,"genre":"Historical","studio":"","day":"","fav":false,"link":"https://www.iq.com/album/jinwu-guard-the-wind-rises-in-jinling-2024-26wdtdtlbo9?lang=en_us","notes":""},
+{"title":"Ten Thousand Worlds","current":0,"latest":0,"status":"To Watch","rating":0,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"https://www.youtube.com/watch?v=nsPYha3f-K8","notes":""},
+{"title":"The Island of Siliang","current":0,"latest":0,"status":"To Watch","rating":0,"genre":"Fantasy","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"The Great Ruler","current":0,"latest":0,"status":"Rewatch","rating":8.6,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Shrouding the Heavens","current":0,"latest":0,"status":"Rewatch","rating":8.8,"genre":"Xianxia","studio":"","day":"","fav":false,"link":"","notes":""},
+{"title":"Against the Sky Supreme","current":0,"latest":0,"status":"Rewatch","rating":7.9,"genre":"Cultivation","studio":"","day":"","fav":false,"link":"","notes":""}
+];
+
+let data = JSON.parse(localStorage.getItem('donghua_pro_v3') || 'null') || JSON.parse(JSON.stringify(DEFAULT_DATA));
+data = data.map(d => ({...d, updated: d.updated || Date.now()}));
+
+function save(){ localStorage.setItem('donghua_pro_v3', JSON.stringify(data)); render(); }
+
+const statusColors = {
+  "Watching":"#22C55E", "Completed":"#3B82F6", "To Watch":"#f97316",
+  "Waiting":"#FBBF24", "Rewatch":"#8B5CF6", "Dropped":"#ef4444", "Trash":"#71717a"
+};
+function chipClass(s){
+  const m={'Watching':'watching','Completed':'completed','Waiting':'waiting','Rewatch':'rewatch','To Watch':'towatch','Dropped':'dropped','Trash':'trash'};
+  return m[s] || 'towatch';
+}
+
+let currentFilter = 'all';
+let query = '';
+let sortBy = 'updated_desc';
+let currentGenre = '';
+
+function filtered(){
+  let list = data.slice();
+  if(currentFilter !== 'all') list = list.filter(d => d.status === currentFilter);
+  if(currentGenre) list = list.filter(d => (d.genre||'').toLowerCase().includes(currentGenre.toLowerCase()));
+  if(query){
+    const q = query.toLowerCase();
+    list = list.filter(d => (d.title+d.genre+d.notes+d.studio).toLowerCase().includes(q));
+  }
+  const [field,dir] = sortBy.split('_');
+  list.sort((a,b)=>{
+    let av=0,bv=0;
+    if(field==='title'){av=a.title.toLowerCase();bv=b.title.toLowerCase();return av<bv?-1:av>bv?1:0}
+    if(field==='ep'){av=a.current||0;bv=b.current||0}
+    if(field==='rating'){av=a.rating||0;bv=b.rating||0}
+    if(field==='progress'){av=(a.latest? a.current/a.latest:0);bv=(b.latest? b.current/b.latest:0)}
+    if(field==='updated'){av=a.updated||0;bv=b.updated||0}
+    return dir==='desc'? bv-av : av-bv;
+  });
+  return list;
+}
+
+function renderStats(){
+  const count = (s)=> data.filter(d=>d.status===s).length;
+  const watching = count('Watching');
+  const completed = count('Completed');
+  const towatch = count('To Watch');
+  const rewatch = count('Rewatch');
+  const waiting = count('Waiting');
+  const dropped = count('Dropped') + data.filter(d=>d.status==='Trash').length;
+  const total = data.length;
+  const eps = data.reduce((sum,d)=> sum + (d.current||0),0);
+  const rated = data.filter(d=>d.rating>0);
+  const avg = rated.length ? (rated.reduce((s,d)=>s+d.rating,0)/rated.length).toFixed(1) : '—';
+  const completedEps = data.filter(d=>d.status==='Completed').reduce((s,d)=>s+(d.current||0),0);
+  const completionPct = total ? Math.round(completed/total*100) : 0;
+
+  const stats = [
+    ['Total Donghua', total],
+    ['Currently Watching', watching],
+    ['Completed', completed],
+    ['Waiting for Update', waiting],
+    ['To Watch', towatch],
+    ['Rewatch', rewatch],
+    ['Dropped', dropped],
+    ['Avg Rating', avg],
+    ['Episodes Watched', eps.toLocaleString()],
+  ];
+  document.getElementById('statsGrid').innerHTML = stats.map(([label,val],i)=>`
+    <div class="stat-card ${i<2?'accent':''}">
+      <div class="label">${label}</div>
+      <div class="value">${val}</div>
+    </div>`).join('');
+
+  // pie
+  const pieData = [
+    ['Watching', watching, '#22C55E'],
+    ['Completed', completed, '#3B82F6'],
+    ['To Watch', towatch, '#f97316'],
+    ['Rewatch', rewatch, '#8B5CF6'],
+    ['Waiting', waiting, '#FBBF24'],
+    ['Dropped', dropped, '#ef4444'],
+  ].filter(x=>x[1]>0);
+  drawPie('pie', pieData);
+  document.getElementById('pieLegend').innerHTML = pieData.map(([n,v,c])=>`<div><span class="dot" style="background:${c}"></span>${n} — ${v}</div>`).join('');
+
+  const overall = Math.min(100, Math.round(completionPct));
+  document.getElementById('overallProgress').style.width = overall+'%';
+  document.getElementById('overallText').textContent = `${completed} / ${total} completed • ${overall}% • ${eps.toLocaleString()} eps watched`;
+
+  // recent / top
+  const recent = [...data].filter(d=>d.updated).sort((a,b)=>b.updated-a.updated).slice(0,5);
+  document.getElementById('recentList').innerHTML = '<b style="color:#dbe4f5">Recent Updates</b><br>' + 
+    recent.map(d=>`EP ${d.current} • ${escapeHtml(d.title)} <span style="color:#7f8da6">· ${d.status}</span>`).join('<br>');
+  
+  const top = [...data].filter(d=>d.rating>=8.5).sort((a,b)=>b.rating-a.rating).slice(0,5);
+  document.getElementById('topRated').innerHTML = '<b style="color:#dbe4f5">Top Rated</b><br>' +
+    top.map(d=>`★ ${d.rating.toFixed(1)} • ${escapeHtml(d.title)}`).join('<br>');
+}
+
+function drawPie(id, segments){
+  const c = document.getElementById(id);
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  const total = segments.reduce((s,[,v])=>s+v,0) || 1;
+  let start = -Math.PI/2;
+  const cx=90, cy=90, r=78;
+  segments.forEach(([,,color,v])=>{
+    // actually second element is value - fix
+  });
+  // Redo with correct unpacking
+  ctx.clearRect(0,0,c.width,c.height);
+  start = -Math.PI/2;
+  segments.forEach(seg=>{
+    const value = seg[1], color = seg[2];
+    const angle = value/total * Math.PI*2;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,start+angle);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    start += angle;
+  });
+  // hole
+  ctx.globalCompositeOperation='destination-out';
+  ctx.beginPath(); ctx.arc(cx,cy,48,0,Math.PI*2); ctx.fill();
+  ctx.globalCompositeOperation='source-over';
+}
+
+function cardHtml(d, idx){
+  const progress = d.latest ? Math.min(100, Math.round((d.current||0)/d.latest*100)) : 0;
+  const newEp = d.latest > d.current ? `<span style="color:#7af0a6;font-weight:700">+${d.latest-d.current} New</span>` : '';
+  return `<div class="card">
+    <div class="poster">
+      <div class="poster-title">${escapeHtml(d.title)}</div>
+      <button class="fav-btn" data-fav="${idx}" title="Favorite">${d.fav ? '★' : '☆'}</button>
+    </div>
+    <div class="card-body">
+      <div class="rowline">
+        <span class="chip ${chipClass(d.status)}">${d.status}</span>
+        <span class="meta">${escapeHtml(d.genre||'Cultivation')}</span>
+      </div>
+      <div class="rowline">
+        <div class="ep-controls">
+          <button class="ep-btn" data-dec="${idx}">−</button>
+          <span class="ep-num">${d.current||0} / ${d.latest||d.current||'?'}</span>
+          <button class="ep-btn" data-inc="${idx}">+</button>
+        </div>
+        <div class="meta">★ ${(d.rating||0).toFixed(1)}</div>
+      </div>
+      <div class="progress"><span style="width:${progress}%"></span></div>
+      <div class="card-footer">
+        <span>${newEp || (d.day ? '📅 ' + d.day : '—')}</span>
+        ${d.link ? `<a class="watch-link" href="${d.link}" target="_blank" rel="noopener">▶ Watch</a>` : '<span></span>'}
+      </div>
+      <div style="margin-top:7px;font-size:11px;color:#8b97ad;cursor:pointer" data-edit="${idx}">${escapeHtml(d.notes|| (d.studio? d.studio : 'Click to edit…'))}</div>
+    </div>
+  </div>`;
+}
+
+function renderLibrary(){
+  const list = filtered();
+  document.getElementById('libraryGrid').innerHTML = list.map(d=>{
+    const idx = data.indexOf(d);
+    return cardHtml(d, idx);
+  }).join('') || '<div style="color:#8b97ad">No results.</div>';
+  // bind
+  document.querySelectorAll('[data-inc]').forEach(b=>b.onclick = ()=>{
+    const i = +b.dataset.inc; data[i].current = (data[i].current||0)+1;
+    if(data[i].latest < data[i].current) data[i].latest = data[i].current;
+    data[i].updated = Date.now(); save();
+  });
+  document.querySelectorAll('[data-dec]').forEach(b=>b.onclick = ()=>{
+    const i = +b.dataset.dec; data[i].current = Math.max(0,(data[i].current||0)-1);
+    data[i].updated = Date.now(); save();
+  });
+  document.querySelectorAll('[data-fav]').forEach(b=>b.onclick = (e)=>{
+    e.stopPropagation(); const i = +b.dataset.fav; data[i].fav = !data[i].fav; save();
+  });
+  document.querySelectorAll('[data-edit]').forEach(el=>el.onclick = ()=>openEditor(+el.dataset.edit));
+}
+
+function renderFavorites(){
+  const favs = data.filter(d=>d.fav);
+  document.getElementById('favoritesGrid').innerHTML = favs.length ? favs.map(d=>cardHtml(d, data.indexOf(d))).join('') : '<div style="color:#8b97ad">Star shows in the Library to add them here.</div>';
+}
+
+function renderCalendar(){
+  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','Unscheduled'];
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = days.map(day=>{
+    const items = data.filter(d=> (d.day||'Unscheduled')===day && ['Watching','Waiting','Rewatch'].includes(d.status));
+    return `<div class="cal-day"><h4>${day}</h4>${items.length? items.map(d=>`<div class="cal-item">• ${escapeHtml(d.title)} <span style="color:#7f8da6">EP ${d.current}</span></div>`).join('') : '<div class="cal-item" style="color:#6b768c">—</div>'}</div>`;
+  }).join('');
+}
+
+function renderTables(){
+  const completed = data.filter(d=>d.status==='Completed');
+  document.querySelector('#completedTable tbody').innerHTML = completed.map(d=>`<tr><td>${escapeHtml(d.title)}</td><td>${d.current}</td><td>★ ${d.rating.toFixed(1)}</td><td>${d.link? `<a href="${d.link}" target="_blank">▶ Watch</a>`:''}</td></tr>`).join('');
+  const dropped = data.filter(d=>['Dropped','Trash'].includes(d.status));
+  document.querySelector('#droppedTable tbody').innerHTML = dropped.map(d=>`<tr><td>${escapeHtml(d.title)}</td><td>${d.current}</td><td>${escapeHtml(d.notes||'—')}</td><td>${d.link? `<a href="${d.link}" target="_blank">▶</a>`:''}</td></tr>`).join('');
+}
+
+function renderStatistics(){
+  const genres = {};
+  data.forEach(d => { const g=(d.genre||'Unknown').split('/')[0].trim(); genres[g]=(genres[g]||0)+1 });
+  const topGenre = Object.entries(genres).sort((a,b)=>b[1]-a[1])[0] || ['—',0];
+  const longest = [...data].sort((a,b)=>(b.current||0)-(a.current||0))[0];
+  const highest = [...data].filter(d=>d.rating>0).sort((a,b)=>b.rating-a.rating)[0];
+  const epsWatched = data.reduce((s,d)=>s+(d.current||0),0);
+  const epsRemaining = data.filter(d=>['Watching','Waiting','Rewatch'].includes(d.status)).reduce((s,d)=>s+Math.max(0,(d.latest||d.current)-d.current),0);
+  const avgEp = (epsWatched / data.length).toFixed(0);
+  const completion = Math.round(data.filter(d=>d.status==='Completed').length / data.length *100);
+
+  document.getElementById('statsBody').innerHTML = `
+  Most watched genre: <b>${topGenre[0]}</b> (${topGenre[1]} shows)<br>
+  Longest Donghua: <b>${escapeHtml(longest?longest.title:'—')}</b> — ${longest?longest.current:0} eps<br>
+  Highest Rated: <b>${escapeHtml(highest?highest.title:'—')}</b> — ★ ${highest?highest.rating.toFixed(1):'—'}<br>
+  Episodes Watched: <b>${epsWatched.toLocaleString()}</b><br>
+  Episodes Remaining (catch-up): <b>${epsRemaining}</b><br>
+  Average Episode Count: <b>${avgEp}</b><br>
+  Completion %: <b>${completion}%</b>
+  `;
+}
+
+function render(){
+  renderStats();
+  renderLibrary();
+  renderFavorites();
+  renderCalendar();
+  renderTables();
+  renderStatistics();
+  populateGenreFilter();
+}
+
+function populateGenreFilter(){
+  const sel = document.getElementById('filterGenre');
+  const genres = [...new Set(data.map(d=>(d.genre||'').split('/')[0].trim()).filter(Boolean))].sort();
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All</option>' + genres.map(g=>`<option>${escapeHtml(g)}</option>`).join('');
+  if(genres.includes(cur)) sel.value = cur;
+}
+
+// Editor
+let editingIndex = -1;
+function openEditor(i){
+  editingIndex = i;
+  const d = i>=0 ? data[i] : {title:'',current:0,latest:0,rating:0,status:'Watching',genre:'Xianxia',studio:'',day:'',link:'',notes:'',fav:false};
+  document.getElementById('modalTitle').textContent = i>=0 ? 'Edit Donghua' : 'Add Donghua';
+  f_title.value = d.title||'';
+  f_current.value = d.current||0;
+  f_latest.value = d.latest||d.current||0;
+  f_rating.value = d.rating||0;
+  f_status.value = d.status||'Watching';
+  f_day.value = d.day||'';
+  f_genre.value = d.genre||'';
+  f_studio.value = d.studio||'';
+  f_link.value = d.link||'';
+  f_notes.value = d.notes||'';
+  f_fav.checked = !!d.fav;
+  document.getElementById('modalDelete').style.display = i>=0 ? '' : 'none';
+  document.getElementById('modalBg').style.display='flex';
+}
+function closeEditor(){ document.getElementById('modalBg').style.display='none'; }
+document.getElementById('modalCancel').onclick = closeEditor;
+document.getElementById('modalBg').onclick = (e)=>{ if(e.target.id==='modalBg') closeEditor() };
+document.getElementById('modalSave').onclick = ()=>{
+  const obj = {
+    title: f_title.value.trim(),
+    current: parseInt(f_current.value)||0,
+    latest: parseInt(f_latest.value)||0,
+    rating: parseFloat(f_rating.value)||0,
+    status: f_status.value,
+    day: f_day.value,
+    genre: f_genre.value,
+    studio: f_studio.value,
+    link: f_link.value.trim(),
+    notes: f_notes.value.trim(),
+    fav: f_fav.checked,
+    updated: Date.now()
+  };
+  if(!obj.title) return alert('Title required');
+  if(editingIndex>=0) data[editingIndex] = {...data[editingIndex], ...obj};
+  else data.unshift(obj);
+  closeEditor(); save();
+};
+document.getElementById('modalDelete').onclick = ()=>{
+  if(editingIndex>=0 && confirm('Delete "'+data[editingIndex].title+'"?')) {
+    data.splice(editingIndex,1); closeEditor(); save();
+  }
+};
+
+// UI bindings
+document.getElementById('q').addEventListener('input', e=>{query=e.target.value; renderLibrary()});
+document.getElementById('statusPills').addEventListener('click', e=>{
+  const p = e.target.closest('.pill'); if(!p) return;
+  document.querySelectorAll('#statusPills .pill').forEach(x=>x.classList.remove('active'));
+  p.classList.add('active'); currentFilter = p.dataset.status; renderLibrary();
+});
+document.getElementById('sortBy').onchange = e=>{ sortBy=e.target.value; renderLibrary() };
+document.getElementById('filterGenre').onchange = e=>{ currentGenre=e.target.value; renderLibrary() };
+document.getElementById('addBtn').onclick = ()=>openEditor(-1);
+
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  const name = t.dataset.tab;
+  ['library','favorites','calendar','completed','dropped','statistics'].forEach(v=>{
+    document.getElementById('view-'+v).classList.toggle('hidden', v!==name);
+  });
+}));
+
+// Export / Import
+document.getElementById('exportBtn').onclick = ()=>{
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='donghua_library.json'; a.click(); URL.revokeObjectURL(a.href);
+};
+document.getElementById('exportCsvBtn').onclick = ()=>{
+  const headers = ['Title','Current EP','Latest EP','Status','Rating','Genre','Studio','ReleaseDay','Favorite','Link','Notes'];
+  const rows = data.map(d=>[d.title,d.current,d.latest,d.status,d.rating,d.genre,d.studio,d.day,d.fav?'Y':'',d.link,d.notes].map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(','));
+  const csv = headers.join(',')+'\n'+rows.join('\n');
+  const blob = new Blob([csv], {type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='donghua_library.csv'; a.click(); URL.revokeObjectURL(a.href);
+};
+document.getElementById('importBtn').onclick = ()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange = async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{ const j=JSON.parse(await f.text()); if(Array.isArray(j)){ data=j; save(); alert('Imported '+j.length+' entries'); } else alert('Invalid file'); }
+  catch(err){ alert('Import failed: '+err.message) }
+  e.target.value='';
+};
+document.getElementById('resetBtn').onclick = ()=>{
+  if(confirm('Reset to the default 87-entry list? This overwrites your current data.')){ localStorage.removeItem('donghua_pro_v3'); location.reload(); }
+};
+
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) }
+
+// keyboard: / to focus search
+window.addEventListener('keydown', e=>{ if(e.key==='/' && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='TEXTAREA'){ e.preventDefault(); document.getElementById('q').focus(); } });
+
+render();
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a117ec02cae533a8',t:'MTc4MjQzMTkyMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
